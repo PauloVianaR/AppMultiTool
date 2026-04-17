@@ -1,23 +1,25 @@
-﻿using System;
+﻿using AppMultiTool.Models;
+using AppMultiTool.Utils;
+using AppMultiTool.Utils.Controllers;
+using AppMultiTool.Utils.GlobalItems;
+using MasterWindowsForms;
+using MySql.Data.MySqlClient;
+using NPOI.HSSF.UserModel;
+using OfficeOpenXml;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.IO;
-using MasterWindowsForms;
-using AppMultiTool.Utils;
-using AppMultiTool.Models;
-using OfficeOpenXml;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
 using LicenseContext = OfficeOpenXml.LicenseContext;
-using System.Diagnostics;
-using System.Globalization;
-using NPOI.HSSF.UserModel;
-using AppMultiTool.Utils.GlobalItems;
-using AppMultiTool.Utils.Controllers;
 
 namespace AppMultiTool.MainForms
 {
@@ -25,11 +27,13 @@ namespace AppMultiTool.MainForms
     {
         private readonly SSConverterModel controller = new();
         private readonly XMLHandler xml;
+        private readonly MasterMySQLService sql;
 
         public SpreadSheetConverter()
         {
             InitializeComponent();
 
+            sql = new(MySQLService.GetConnectString(Databases.AppMultiTool));
             xml = new(CommonFile.AppSettings);
             ThemeType ttype = bool.Parse(xml.GetValueByAddKey(AppKeys.UseDarkTheme).Response) ? ThemeType.Dark : ThemeType.White;
             WallPaper wpp = Enum.Parse<WallPaper>(xml.GetValueByAddKey(AppKeys.WallPaper).Response);
@@ -134,7 +138,7 @@ namespace AppMultiTool.MainForms
             return xlsxPath;
         }
 
-        private void btnConvert_Click(object sender, EventArgs e)
+        private async void btnConvert_Click(object sender, EventArgs e)
         {
             try
             {
@@ -147,7 +151,7 @@ namespace AppMultiTool.MainForms
                 if (Utilix.IsNullOrEmptyOrWhiteSpace(txtWorkSheetName.Text) && chkGetSheetName.Checked)
                     throw new Exception("A opção de especificar planilha está marcada no entanto a planilha em questão não foi especificada.");
 
-                ConvertToTxt();
+                await ConvertToTxt();
             }
             catch(Exception ex)
             {
@@ -209,7 +213,7 @@ namespace AppMultiTool.MainForms
             txtCellFormat.Font = new Font(txtCellFormat.Font.FontFamily, size);
         }
 
-        private void ConvertToTxt()
+        private async Task ConvertToTxt()
         {
             Color backcolor = btnConvert.BackColor;
 
@@ -236,7 +240,7 @@ namespace AppMultiTool.MainForms
                 {
                     worksheet = wb?.Worksheets?.FirstOrDefault(ws => ws.Name.ToUpper().Trim() == controller.WorkSheetName.ToUpper().Trim());
                     if (worksheet is null)
-                        throw new Exception($"Planilha '{controller.WorkSheetName}' não encontrado.");
+                        throw new Exception($"Planilha '{controller.WorkSheetName}' não encontrada.");
                 }
                 else
                 {
@@ -285,8 +289,10 @@ namespace AppMultiTool.MainForms
                                 sb.Append(newValue);
                             }
 
-                            writer.WriteLine(sb.ToString().Replace("| OfficeOpenXml.RowInternal |", ""));
+                            writer.WriteLine(sb.ToString().Replace("| OfficeOpenXml.RowInternal |", string.Empty));
                         }
+
+                        await LogCommand();
 
                         if (Master.ShowQuestionMessage("Arquivo criado com Êxito. Deseja já abrí-lo?", "Sucesso") == DialogResult.Yes)
                             canOpenFinalFile = true;
@@ -372,11 +378,11 @@ namespace AppMultiTool.MainForms
                         value = value.Replace(",", "").Replace(".",",");
                         break;
                     case "DATABR":
-                        DateTime datebr = DateTime.ParseExact(value, "yyyy-MM-dd", null);
+                        DateTime datebr = DateTime.Parse(value);
                         value = datebr.ToString("dd/MM/yyyy");
                         break;
                     case "DATA":
-                        DateTime date = DateTime.ParseExact(value, "dd/MM/yyyy", null);
+                        DateTime date = DateTime.Parse(value);
                         value = date.ToString("yyyy-MM-dd");
                         break;
                     case "FLOOR": double newvalue;
@@ -392,6 +398,35 @@ namespace AppMultiTool.MainForms
             catch (Exception) { }            
 
             return value;
+        }
+
+        private async Task LogCommand()
+        {
+            bool canlog = bool.Parse(xml.GetValueByAddKey(AppKeys.UseSpreedSheetConverterLogger).Response);
+            if (!canlog)
+            {
+                await Task.CompletedTask;
+                return;
+            }
+
+            try
+            {
+                string sqlquery = $"INSERT INTO log(route,log1,log2) VALUES (@route,@log1,@log2)";
+
+                var command = new MySqlCommand(sqlquery, sql.Connection);
+                command.Parameters.AddWithValue("@route", "SpreadSheetConverter");
+                command.Parameters.AddWithValue("@log1", txtCommand.Text);
+                command.Parameters.AddWithValue("@log2", txtCellFormat.Text);
+
+                var resp = await sql.ExecuteQuery(command);
+
+                if (!resp.WasSuccessful)
+                    throw new Exception(resp.ResponseErr);
+            }
+            catch (Exception ex)
+            {
+                Master.ShowErrorMessage(ex.Message,"Falha ao tentar salvar LOG");
+            }
         }
     }
 }

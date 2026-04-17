@@ -51,6 +51,7 @@ namespace AppMultiTool.RelatedForms
             label5 = new System.Windows.Forms.Label();
             txtFolderDefaultPath = new System.Windows.Forms.TextBox();
             btnPickFolder = new System.Windows.Forms.Button();
+            chbUseSSLogger = new System.Windows.Forms.CheckBox();
             menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)numTimeOut).BeginInit();
             SuspendLayout();
@@ -259,7 +260,7 @@ namespace AppMultiTool.RelatedForms
             // 
             label5.AutoSize = true;
             label5.Font = new System.Drawing.Font("Segoe UI", 12F);
-            label5.Location = new System.Drawing.Point(12, 448);
+            label5.Location = new System.Drawing.Point(12, 504);
             label5.Name = "label5";
             label5.Size = new System.Drawing.Size(273, 21);
             label5.TabIndex = 19;
@@ -268,7 +269,7 @@ namespace AppMultiTool.RelatedForms
             // txtFolderDefaultPath
             // 
             txtFolderDefaultPath.Font = new System.Drawing.Font("Segoe UI", 12F);
-            txtFolderDefaultPath.Location = new System.Drawing.Point(291, 447);
+            txtFolderDefaultPath.Location = new System.Drawing.Point(291, 503);
             txtFolderDefaultPath.Name = "txtFolderDefaultPath";
             txtFolderDefaultPath.Size = new System.Drawing.Size(309, 29);
             txtFolderDefaultPath.TabIndex = 20;
@@ -276,7 +277,7 @@ namespace AppMultiTool.RelatedForms
             // btnPickFolder
             // 
             btnPickFolder.Cursor = System.Windows.Forms.Cursors.Hand;
-            btnPickFolder.Location = new System.Drawing.Point(291, 482);
+            btnPickFolder.Location = new System.Drawing.Point(291, 538);
             btnPickFolder.Name = "btnPickFolder";
             btnPickFolder.Size = new System.Drawing.Size(117, 23);
             btnPickFolder.TabIndex = 21;
@@ -284,11 +285,24 @@ namespace AppMultiTool.RelatedForms
             btnPickFolder.UseVisualStyleBackColor = true;
             btnPickFolder.Click += btnPickFolder_Click;
             // 
+            // chbUseSSLogger
+            // 
+            chbUseSSLogger.AutoSize = true;
+            chbUseSSLogger.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            chbUseSSLogger.Font = new System.Drawing.Font("Segoe UI", 12F);
+            chbUseSSLogger.Location = new System.Drawing.Point(12, 453);
+            chbUseSSLogger.Name = "chbUseSSLogger";
+            chbUseSSLogger.Size = new System.Drawing.Size(305, 25);
+            chbUseSSLogger.TabIndex = 22;
+            chbUseSSLogger.Text = "Salvar registros da planilha conversora?";
+            chbUseSSLogger.UseVisualStyleBackColor = true;
+            // 
             // GeneralConfigs
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             ClientSize = new System.Drawing.Size(612, 647);
+            Controls.Add(chbUseSSLogger);
             Controls.Add(btnPickFolder);
             Controls.Add(txtFolderDefaultPath);
             Controls.Add(label5);
@@ -345,5 +359,6 @@ namespace AppMultiTool.RelatedForms
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox txtFolderDefaultPath;
         private System.Windows.Forms.Button btnPickFolder;
+        private System.Windows.Forms.CheckBox chbUseSSLogger;
     }
 }

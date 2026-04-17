@@ -27,7 +27,8 @@ namespace AppMultiTool.Utils
         UseDarkTheme,
         CloseAfterCheckedDefaultRoutine,
         WallPaper,
-        DefaultDownloadFolderPath
+        DefaultDownloadFolderPath,
+        UseSpreedSheetConverterLogger
     }
 
     public enum CommonFile

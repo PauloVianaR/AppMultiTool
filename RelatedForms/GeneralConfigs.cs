@@ -72,6 +72,9 @@ namespace AppMultiTool.RelatedForms
                 sb.AppendLine(this.GetTagValue(AppKeys.DefaultDownloadFolderPath, out resp));
                 txtFolderDefaultPath.Text = resp.Response;
 
+                sb.AppendLine(this.GetTagValue(AppKeys.UseSpreedSheetConverterLogger, out resp));
+                chbUseSSLogger.Checked = bool.Parse(resp.Response);
+
                 lblNotSavedInfo.Visible = false;
 
                 string errorList = sb.ToString().Trim();
@@ -119,7 +122,7 @@ namespace AppMultiTool.RelatedForms
                 sb.AppendLine(this.SetTagValue(AppKeys.UseDarkTheme, chbUseDarkTheme.Checked.ToString()));
                 sb.AppendLine(this.SetTagValue(AppKeys.CloseAfterCheckedDefaultRoutine, chbCloseAfterCheckedDefault.Checked.ToString()));
                 sb.AppendLine(this.SetTagValue(AppKeys.DefaultDownloadFolderPath, txtFolderDefaultPath.Text));
-
+                sb.AppendLine(this.SetTagValue(AppKeys.UseSpreedSheetConverterLogger, chbUseSSLogger.Checked.ToString()));
 
                 string errorList = sb.ToString().Trim();
 
