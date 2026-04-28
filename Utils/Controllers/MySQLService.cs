@@ -11,6 +11,13 @@ namespace AppMultiTool.Utils.Controllers
 {
     public static class MySQLService
     {
+        private static readonly XMLHandler xml;
+
+        static MySQLService()
+        {
+            xml = new(CommonFile.AppSettings);
+        }
+
         public static string GetConnectString(Databases db)
         {
             string _conecstring = string.Empty;
@@ -18,10 +25,10 @@ namespace AppMultiTool.Utils.Controllers
             switch ((int)db)
             {
                 case 0:
-                    _conecstring = "Server=localhost;Database=appmultitool;Uid=root;Pwd=Relapa123635241987$;";
+                    _conecstring = xml.GetValueByAddKey(AppKeys.ConnectionString).Response;
                     break;
                 case 1:
-                    _conecstring = "Server=localhost;Database=bancoteste;Uid=root;Pwd=Relapa123635241987$;";
+                    _conecstring = "Server=localhost;Database=bancoteste;Uid=root;Pwd=123456";
                     break;
             }
 
@@ -32,6 +39,6 @@ namespace AppMultiTool.Utils.Controllers
     public enum Databases
     {
         AppMultiTool,
-        BancoTeste
+        Other
     }
 }

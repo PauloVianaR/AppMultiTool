@@ -28,7 +28,8 @@ namespace AppMultiTool.Utils
         CloseAfterCheckedDefaultRoutine,
         WallPaper,
         DefaultDownloadFolderPath,
-        UseSpreedSheetConverterLogger
+        UseSpreedSheetConverterLogger,
+        ConnectionString
     }
 
     public enum CommonFile
