@@ -13,9 +13,19 @@ namespace AppMultiTool.Utils.GlobalItems
     public static class Global
     {
         public const string PyModulesPath = @"..\..\..\PyModules\";
-        public const string MaterialPath = @"..\..\..\Material\";
-        public const string OAuthCredentialPath = @"..\..\..\Material\googlecredentials.json";
-        public const string ffmpegPath = "ffmpeg.exe";
+
+        public static readonly string BasePath = AppDomain.CurrentDomain.BaseDirectory;
+        public static readonly string MaterialPath = Path.Combine(BasePath, "Material");
+
+        public static readonly string OAuthCredentialPath = Path.Combine(
+            MaterialPath,
+            "googlecredentials.json"
+        );
+
+        public static readonly string ffmpegPath = Path.Combine(
+            MaterialPath,
+            "ffmpeg.exe"
+        );
 
         public static bool AllowCloseApp { get; set; } = true;
         public static InactivityMonitor InactivityMonitor { get; set; } = new();

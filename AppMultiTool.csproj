@@ -78,4 +78,14 @@
     <Folder Include="PyModules\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="AppSettings.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+
+    <None Update="Material\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

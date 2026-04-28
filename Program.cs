@@ -23,6 +23,8 @@ namespace AppMultiTool
             Global.InactivityMonitor.OnInactivityTimeout += (object sender, EventArgs e) => Application.Exit();
             Global.GlobalTimer.StartTimer();
 
+            AppDataManager.Initialize();
+
             Application.Run(Global.Forms.MainMenu);
         }
     }

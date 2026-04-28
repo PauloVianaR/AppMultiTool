@@ -1,10 +1,11 @@
-﻿using System;
+﻿using MasterWindowsForms;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using MasterWindowsForms;
 
 namespace AppMultiTool.Utils.Controllers
 {
@@ -19,10 +20,33 @@ namespace AppMultiTool.Utils.Controllers
 
         public XMLHandler(CommonFile file)
         {
-            if (file == CommonFile.AppSettings)
-                FilePath = @"..\..\..\AppSettings.config";
-            else
+            if (file != CommonFile.AppSettings)
+            {
                 FilePath = string.Empty;
+                return;
+            }
+
+            string basePath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "AppMultiTool"
+            );
+
+            Directory.CreateDirectory(basePath);
+
+            FilePath = Path.Combine(basePath, "AppSettings.config");
+
+            if (!File.Exists(FilePath))
+            {
+                string defaultPath = Path.Combine(
+                    AppDomain.CurrentDomain.BaseDirectory,
+                    "AppSettings.config"
+                );
+
+                if (File.Exists(defaultPath))
+                {
+                    File.Copy(defaultPath, FilePath);
+                }
+            }
         }
 
         public ResponseHandler<string> GetValueByAddKey(AppKeys tag) => GetValueByAddKey(tag.ToString());
