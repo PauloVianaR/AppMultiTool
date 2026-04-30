@@ -173,7 +173,7 @@ namespace AppMultiTool.MainForms
                 "\n&A=FLOOR     -> Arredonda pra baixo, result = INT",
                 "\n&A=CEILING   -> Arredonda pra cima, result = INT",
                 "\n\nObs: formatos em texto não precisam ser explicitados na caixa de formatação.",
-                "\nObs 2: se for formatar em mais de uma célula então deve ser usada a separação com pipe '|'. Exemplo: &A=DECIMAL.|&B=INT");
+                "\nObs 2: se for formatar em mais de uma célula então deve ser usada a separação com chave aberta '{'. Exemplo: &A=DECIMAL.{&B=INT");
 
             Master.ShowInfoMessage(msg,"Formatações Possíveis");
         }
@@ -184,7 +184,7 @@ namespace AppMultiTool.MainForms
                 Utilix.HighlightSyntax(sender as RichTextBox);
         }
 
-        private void lblShowCommandExemple_Click(object sender, EventArgs e) => Master.ShowInfoMessage("INSERT INTO table_name(COL1,COL2) VALUES(|B|,'|C|');","Exemplo de comando");
+        private void lblShowCommandExemple_Click(object sender, EventArgs e) => Master.ShowInfoMessage("INSERT INTO table_name(COL1,COL2) VALUES({B{,'{C{');","Exemplo de comando");
         private void chkVerifyHeader_CheckedChanged(object sender, EventArgs e) => controller.WsContainsHeader = (sender as CheckBox).Checked;        
         private void txtWorkSheetName_TextChanged(object sender, EventArgs e) => controller.WorkSheetName = chkGetSheetName.Checked ? txtWorkSheetName.Text : "*";
 
@@ -223,10 +223,10 @@ namespace AppMultiTool.MainForms
 
             try
             {
-                if (!txtCommand.Text.Contains('|'))
-                    throw new Exception("O comando SQL precisar conter '|' ");
+                if (!txtCommand.Text.Contains('{'))
+                    throw new Exception("O comando SQL precisar conter '{' ");
 
-                List<string> sqlCommand = txtCommand.Text.Split("|").ToList();
+                List<string> sqlCommand = txtCommand.Text.Split("{").ToList();
 
                 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
@@ -339,9 +339,9 @@ namespace AppMultiTool.MainForms
 
         private string ValueConverted(string value,string columnName)
         {
-            if (txtCellFormat.Text.Contains("|"))
+            if (txtCellFormat.Text.Contains("{"))
             {
-                List<string> formats = txtCellFormat.Text.Split("|").ToList();
+                List<string> formats = txtCellFormat.Text.Split("{").ToList();
                 string cellformat = formats.Find(f => f.Contains("&" + columnName));
                 if (cellformat is not null)
                 {
@@ -367,8 +367,7 @@ namespace AppMultiTool.MainForms
                 switch (format)
                 {
                     case "INT":
-                        int newvalueINT;
-                        if (int.TryParse(value.Replace(",", "."), NumberStyles.Any, CultureInfo.InvariantCulture, out newvalueINT))
+                        if (int.TryParse(value.Replace(",", "."), NumberStyles.Any, CultureInfo.InvariantCulture, out int newvalueINT))
                             value = newvalueINT.ToString();
                         break;
                     case "DECIMAL.":
