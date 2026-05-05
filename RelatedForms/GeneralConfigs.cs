@@ -75,6 +75,9 @@ namespace AppMultiTool.RelatedForms
                 sb.AppendLine(this.GetTagValue(AppKeys.UseSpreedSheetConverterLogger, out resp));
                 chbUseSSLogger.Checked = bool.Parse(resp.Response);
 
+                sb.AppendLine(this.GetTagValue(AppKeys.DefaultSeparator, out resp));
+                txtDefaultSeparator.Text = resp.Response;
+
                 lblNotSavedInfo.Visible = false;
 
                 string errorList = sb.ToString().Trim();
@@ -108,6 +111,9 @@ namespace AppMultiTool.RelatedForms
                 StringBuilder sb = new();
                 ResponseHandler<bool> resp = new();
 
+                if (string.IsNullOrWhiteSpace(txtDefaultSeparator.Text))
+                    throw new Exception("O separador padrão não pode ser vazio!");
+
                 sb.AppendLine(this.SetTagValue(AppKeys.InactivityTimeOut, numTimeOut.Value.ToString()));
                 Global.InactivityMonitor.InactivityLimitInMinutes = (int)numTimeOut.Value;
 
@@ -123,6 +129,7 @@ namespace AppMultiTool.RelatedForms
                 sb.AppendLine(this.SetTagValue(AppKeys.CloseAfterCheckedDefaultRoutine, chbCloseAfterCheckedDefault.Checked.ToString()));
                 sb.AppendLine(this.SetTagValue(AppKeys.DefaultDownloadFolderPath, txtFolderDefaultPath.Text));
                 sb.AppendLine(this.SetTagValue(AppKeys.UseSpreedSheetConverterLogger, chbUseSSLogger.Checked.ToString()));
+                sb.AppendLine(this.SetTagValue(AppKeys.DefaultSeparator, txtDefaultSeparator.Text));
 
                 string errorList = sb.ToString().Trim();
 

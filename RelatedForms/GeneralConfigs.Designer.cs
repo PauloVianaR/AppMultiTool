@@ -52,6 +52,8 @@ namespace AppMultiTool.RelatedForms
             txtFolderDefaultPath = new System.Windows.Forms.TextBox();
             btnPickFolder = new System.Windows.Forms.Button();
             chbUseSSLogger = new System.Windows.Forms.CheckBox();
+            txtDefaultSeparator = new System.Windows.Forms.TextBox();
+            label6 = new System.Windows.Forms.Label();
             menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)numTimeOut).BeginInit();
             SuspendLayout();
@@ -81,7 +83,7 @@ namespace AppMultiTool.RelatedForms
             btnSave.BackColor = System.Drawing.Color.ForestGreen;
             btnSave.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             btnSave.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Bold);
-            btnSave.Location = new System.Drawing.Point(229, 578);
+            btnSave.Location = new System.Drawing.Point(229, 621);
             btnSave.Name = "btnSave";
             btnSave.Size = new System.Drawing.Size(128, 45);
             btnSave.TabIndex = 3;
@@ -133,7 +135,7 @@ namespace AppMultiTool.RelatedForms
             lblSavedSuccess.AutoSize = true;
             lblSavedSuccess.Font = new System.Drawing.Font("Segoe UI", 16F);
             lblSavedSuccess.ForeColor = System.Drawing.Color.ForestGreen;
-            lblSavedSuccess.Location = new System.Drawing.Point(366, 585);
+            lblSavedSuccess.Location = new System.Drawing.Point(366, 628);
             lblSavedSuccess.Name = "lblSavedSuccess";
             lblSavedSuccess.Size = new System.Drawing.Size(43, 30);
             lblSavedSuccess.TabIndex = 7;
@@ -260,7 +262,7 @@ namespace AppMultiTool.RelatedForms
             // 
             label5.AutoSize = true;
             label5.Font = new System.Drawing.Font("Segoe UI", 12F);
-            label5.Location = new System.Drawing.Point(12, 504);
+            label5.Location = new System.Drawing.Point(12, 547);
             label5.Name = "label5";
             label5.Size = new System.Drawing.Size(273, 21);
             label5.TabIndex = 19;
@@ -269,7 +271,7 @@ namespace AppMultiTool.RelatedForms
             // txtFolderDefaultPath
             // 
             txtFolderDefaultPath.Font = new System.Drawing.Font("Segoe UI", 12F);
-            txtFolderDefaultPath.Location = new System.Drawing.Point(291, 503);
+            txtFolderDefaultPath.Location = new System.Drawing.Point(291, 546);
             txtFolderDefaultPath.Name = "txtFolderDefaultPath";
             txtFolderDefaultPath.Size = new System.Drawing.Size(309, 29);
             txtFolderDefaultPath.TabIndex = 20;
@@ -277,7 +279,7 @@ namespace AppMultiTool.RelatedForms
             // btnPickFolder
             // 
             btnPickFolder.Cursor = System.Windows.Forms.Cursors.Hand;
-            btnPickFolder.Location = new System.Drawing.Point(291, 538);
+            btnPickFolder.Location = new System.Drawing.Point(291, 581);
             btnPickFolder.Name = "btnPickFolder";
             btnPickFolder.Size = new System.Drawing.Size(117, 23);
             btnPickFolder.TabIndex = 21;
@@ -297,11 +299,32 @@ namespace AppMultiTool.RelatedForms
             chbUseSSLogger.Text = "Salvar registros da planilha conversora?";
             chbUseSSLogger.UseVisualStyleBackColor = true;
             // 
+            // txtDefaultSeparator
+            // 
+            txtDefaultSeparator.Font = new System.Drawing.Font("Segoe UI", 12F);
+            txtDefaultSeparator.Location = new System.Drawing.Point(291, 496);
+            txtDefaultSeparator.MaxLength = 3;
+            txtDefaultSeparator.Name = "txtDefaultSeparator";
+            txtDefaultSeparator.Size = new System.Drawing.Size(309, 29);
+            txtDefaultSeparator.TabIndex = 24;
+            // 
+            // label6
+            // 
+            label6.AutoSize = true;
+            label6.Font = new System.Drawing.Font("Segoe UI", 12F);
+            label6.Location = new System.Drawing.Point(12, 497);
+            label6.Name = "label6";
+            label6.Size = new System.Drawing.Size(265, 21);
+            label6.TabIndex = 23;
+            label6.Text = "Separador padrão (max 3 caracteres)";
+            // 
             // GeneralConfigs
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            ClientSize = new System.Drawing.Size(612, 647);
+            ClientSize = new System.Drawing.Size(612, 723);
+            Controls.Add(txtDefaultSeparator);
+            Controls.Add(label6);
             Controls.Add(chbUseSSLogger);
             Controls.Add(btnPickFolder);
             Controls.Add(txtFolderDefaultPath);
@@ -360,5 +383,7 @@ namespace AppMultiTool.RelatedForms
         private System.Windows.Forms.TextBox txtFolderDefaultPath;
         private System.Windows.Forms.Button btnPickFolder;
         private System.Windows.Forms.CheckBox chbUseSSLogger;
+        private System.Windows.Forms.TextBox txtDefaultSeparator;
+        private System.Windows.Forms.Label label6;
     }
 }

@@ -28,6 +28,7 @@ namespace AppMultiTool.MainForms
         private readonly SSConverterModel controller = new();
         private readonly XMLHandler xml;
         private readonly MasterMySQLService sql;
+        private readonly string defaultSeparator = "|";
 
         public SpreadSheetConverter()
         {
@@ -39,6 +40,8 @@ namespace AppMultiTool.MainForms
             WallPaper wpp = Enum.Parse<WallPaper>(xml.GetValueByAddKey(AppKeys.WallPaper).Response);
             ThemeHandler.ApplyTheme(Master.ListControls(this), ttype);
             ThemeHandler.ApplyWallPaper(this, wpp);
+
+            defaultSeparator = xml.GetValueByAddKey(AppKeys.DefaultSeparator).Response;
 
             Global.GlobalTimer.UpdateTitleTime += (object sender, EventArgs e) => Global.GlobalTimer.UpdateTitleTimeLabelForm(lblTitle);
         }
@@ -173,7 +176,7 @@ namespace AppMultiTool.MainForms
                 "\n&A=FLOOR     -> Arredonda pra baixo, result = INT",
                 "\n&A=CEILING   -> Arredonda pra cima, result = INT",
                 "\n\nObs: formatos em texto não precisam ser explicitados na caixa de formatação.",
-                "\nObs 2: se for formatar em mais de uma célula então deve ser usada a separação com chave aberta '{'. Exemplo: &A=DECIMAL.{&B=INT");
+                $"\nObs 2: se for formatar em mais de uma célula então deve ser usado o separador padrão: '{defaultSeparator}'. Exemplo: &A=DECIMAL.{defaultSeparator}&B=INT");
 
             Master.ShowInfoMessage(msg,"Formatações Possíveis");
         }
@@ -184,8 +187,15 @@ namespace AppMultiTool.MainForms
                 Utilix.HighlightSyntax(sender as RichTextBox);
         }
 
-        private void lblShowCommandExemple_Click(object sender, EventArgs e) => Master.ShowInfoMessage("INSERT INTO table_name(COL1,COL2) VALUES({B{,'{C{');","Exemplo de comando");
-        private void chkVerifyHeader_CheckedChanged(object sender, EventArgs e) => controller.WsContainsHeader = (sender as CheckBox).Checked;        
+        private void lblShowCommandExemple_Click(object sender, EventArgs e) => Master.ShowInfoMessage($"INSERT INTO table_name(COL1,COL2) VALUES({defaultSeparator}B{defaultSeparator},'{defaultSeparator}C{defaultSeparator}');","Exemplo de comando");
+        private void chkVerifyHeader_CheckedChanged(object sender, EventArgs e)
+        {
+            bool ischecked = (sender as CheckBox).Checked;
+
+            controller.WsContainsHeader = ischecked;
+            numHeaderCount.Visible = ischecked;
+            txtHowMuchHeader.Visible = ischecked;
+        }        
         private void txtWorkSheetName_TextChanged(object sender, EventArgs e) => controller.WorkSheetName = chkGetSheetName.Checked ? txtWorkSheetName.Text : "*";
 
         private void chkHighLightSQL_CheckedChanged(object sender, EventArgs e)
@@ -223,10 +233,10 @@ namespace AppMultiTool.MainForms
 
             try
             {
-                if (!txtCommand.Text.Contains('{'))
-                    throw new Exception("O comando SQL precisar conter '{' ");
+                if (!txtCommand.Text.Contains(defaultSeparator))
+                    throw new Exception($"O comando SQL precisar conter '{defaultSeparator}' ");
 
-                List<string> sqlCommand = txtCommand.Text.Split("{").ToList();
+                List<string> sqlCommand = txtCommand.Text.Split(defaultSeparator).ToList();
 
                 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
@@ -266,7 +276,9 @@ namespace AppMultiTool.MainForms
                     using StreamWriter writer = new(fileHandler.FileName);
                     try
                     {
-                        for (int i = controller.WsContainsHeader ? 2 : 1; i <= worksheet.Dimension.Rows; i++)
+                        int headercount = controller.WsContainsHeader ? (int)numHeaderCount.Value + 1 : 1;
+
+                        for (int i = headercount; i <= worksheet.Dimension.Rows; i++)
                         {
                             StringBuilder sb = new();
 
@@ -339,9 +351,9 @@ namespace AppMultiTool.MainForms
 
         private string ValueConverted(string value,string columnName)
         {
-            if (txtCellFormat.Text.Contains("{"))
+            if (txtCellFormat.Text.Contains(defaultSeparator))
             {
-                List<string> formats = txtCellFormat.Text.Split("{").ToList();
+                List<string> formats = txtCellFormat.Text.Split(defaultSeparator).ToList();
                 string cellformat = formats.Find(f => f.Contains("&" + columnName));
                 if (cellformat is not null)
                 {

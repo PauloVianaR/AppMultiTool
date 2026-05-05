@@ -49,7 +49,10 @@ namespace AppMultiTool.MainForms
             chkHighLightSQL = new System.Windows.Forms.CheckBox();
             label2 = new System.Windows.Forms.Label();
             cbbFontSize = new System.Windows.Forms.ComboBox();
+            numHeaderCount = new System.Windows.Forms.NumericUpDown();
+            txtHowMuchHeader = new System.Windows.Forms.Label();
             menuStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)numHeaderCount).BeginInit();
             SuspendLayout();
             // 
             // menuStrip1
@@ -107,9 +110,9 @@ namespace AppMultiTool.MainForms
             label3.Font = new System.Drawing.Font("Segoe UI", 12F);
             label3.Location = new System.Drawing.Point(12, 169);
             label3.Name = "label3";
-            label3.Size = new System.Drawing.Size(374, 21);
+            label3.Size = new System.Drawing.Size(141, 21);
             label3.TabIndex = 5;
-            label3.Text = "Formato Comando (separar células da planilha por |)";
+            label3.Text = "Formato Comando";
             // 
             // btnConvert
             // 
@@ -194,7 +197,7 @@ namespace AppMultiTool.MainForms
             // 
             lblShowCommandExemple.AutoSize = true;
             lblShowCommandExemple.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Underline);
-            lblShowCommandExemple.Location = new System.Drawing.Point(383, 175);
+            lblShowCommandExemple.Location = new System.Drawing.Point(159, 174);
             lblShowCommandExemple.Name = "lblShowCommandExemple";
             lblShowCommandExemple.Size = new System.Drawing.Size(172, 15);
             lblShowCommandExemple.TabIndex = 15;
@@ -260,11 +263,33 @@ namespace AppMultiTool.MainForms
             cbbFontSize.TabIndex = 20;
             cbbFontSize.SelectedIndexChanged += cbbFontSize_SelectedIndexChanged;
             // 
+            // numHeaderCount
+            // 
+            numHeaderCount.Font = new System.Drawing.Font("Segoe UI", 10F);
+            numHeaderCount.Location = new System.Drawing.Point(265, 613);
+            numHeaderCount.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            numHeaderCount.Name = "numHeaderCount";
+            numHeaderCount.Size = new System.Drawing.Size(120, 25);
+            numHeaderCount.TabIndex = 21;
+            numHeaderCount.Value = new decimal(new int[] { 1, 0, 0, 0 });
+            // 
+            // txtHowMuchHeader
+            // 
+            txtHowMuchHeader.AutoSize = true;
+            txtHowMuchHeader.Font = new System.Drawing.Font("Segoe UI", 10F);
+            txtHowMuchHeader.Location = new System.Drawing.Point(191, 615);
+            txtHowMuchHeader.Name = "txtHowMuchHeader";
+            txtHowMuchHeader.Size = new System.Drawing.Size(68, 19);
+            txtHowMuchHeader.TabIndex = 22;
+            txtHowMuchHeader.Text = "Quantos?";
+            // 
             // SpreadSheetConverter
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             ClientSize = new System.Drawing.Size(884, 783);
+            Controls.Add(txtHowMuchHeader);
+            Controls.Add(numHeaderCount);
             Controls.Add(cbbFontSize);
             Controls.Add(label2);
             Controls.Add(chkHighLightSQL);
@@ -292,6 +317,7 @@ namespace AppMultiTool.MainForms
             Shown += SpreadSheetConverter_Shown;
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)numHeaderCount).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -317,5 +343,7 @@ namespace AppMultiTool.MainForms
         private System.Windows.Forms.CheckBox chkHighLightSQL;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ComboBox cbbFontSize;
+        private System.Windows.Forms.NumericUpDown numHeaderCount;
+        private System.Windows.Forms.Label txtHowMuchHeader;
     }
 }
