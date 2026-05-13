@@ -51,7 +51,7 @@ namespace AppMultiTool.Utils.Controllers
         {
             Method = _method;
             Ytdl.YoutubeDLPath = youtubeDLPath;
-            Ytdl.FFmpegPath = Global.ffmpegPath;
+            Ytdl.FFmpegPath = Global.FFmpegPath;
             Ytdl.RestrictFilenames = true;
         }
 
@@ -133,9 +133,9 @@ namespace AppMultiTool.Utils.Controllers
                         outputPath = Path.ChangeExtension(outputPath, ".mp3");
 
                         if (progress is not null)
-                            await client.Videos.DownloadAsync(url, outputPath, o => o.SetContainer("mp3"), progress);
+                            await client.Videos.DownloadAsync(url, outputPath, o => o.SetContainer("mp3").SetFFmpegPath(Global.FFmpegPath), progress);
                         else
-                            await client.Videos.DownloadAsync(url, outputPath, o => o.SetContainer("mp3"));
+                            await client.Videos.DownloadAsync(url, outputPath, o => o.SetContainer("mp3").SetFFmpegPath(Global.FFmpegPath));
 
                         resp.IsSuccess(videoTitle);
                         break;
