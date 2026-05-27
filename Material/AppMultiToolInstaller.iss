@@ -1,6 +1,6 @@
 [Setup]
 AppName=AppMultiTool
-AppVersion=1.1
+AppVersion=1.2
 AppPublisher=Paulo Viana
 DefaultDirName={pf}\AppMultiTool
 DefaultGroupName=AppMultiTool

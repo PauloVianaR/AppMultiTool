@@ -35,9 +35,11 @@ namespace AppMultiTool.RelatedForms
             opçõesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             tsmiBackMainMenu = new System.Windows.Forms.ToolStripMenuItem();
             tsmiBackClipBoardCopies = new System.Windows.Forms.ToolStripMenuItem();
+            tsmiTogglePagination = new System.Windows.Forms.ToolStripMenuItem();
             atalhosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             visualizarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             adicionarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            atualizarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             removerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             lblTitle = new System.Windows.Forms.Label();
             btnApplyStrikeout = new System.Windows.Forms.Button();
@@ -65,13 +67,18 @@ namespace AppMultiTool.RelatedForms
             btnPickFolder = new System.Windows.Forms.Button();
             label8 = new System.Windows.Forms.Label();
             txtShowItem = new System.Windows.Forms.RichTextBox();
-            label9 = new System.Windows.Forms.Label();
+            lblAutoRollActive = new System.Windows.Forms.Label();
             tbarAutoRoll = new System.Windows.Forms.TrackBar();
             scrollTimer = new System.Windows.Forms.Timer(components);
             btnUploadToGoogleDocs = new System.Windows.Forms.Button();
             btnRenameItem = new System.Windows.Forms.Button();
             lblSearchText = new System.Windows.Forms.Label();
-            atualizarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            btnLastPage = new System.Windows.Forms.Button();
+            btnNextPage = new System.Windows.Forms.Button();
+            lblPaginationActive = new System.Windows.Forms.Label();
+            lblPageCount = new System.Windows.Forms.Label();
+            btnStartControllerJoystick = new System.Windows.Forms.Button();
+            lblCommandInfo = new System.Windows.Forms.Label();
             menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)tbarAutoRoll).BeginInit();
             SuspendLayout();
@@ -87,7 +94,7 @@ namespace AppMultiTool.RelatedForms
             // 
             // opçõesToolStripMenuItem
             // 
-            opçõesToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { tsmiBackMainMenu, tsmiBackClipBoardCopies, atalhosToolStripMenuItem });
+            opçõesToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { tsmiBackMainMenu, tsmiBackClipBoardCopies, tsmiTogglePagination, atalhosToolStripMenuItem });
             opçõesToolStripMenuItem.Name = "opçõesToolStripMenuItem";
             opçõesToolStripMenuItem.Size = new System.Drawing.Size(59, 20);
             opçõesToolStripMenuItem.Text = "Opções";
@@ -106,6 +113,13 @@ namespace AppMultiTool.RelatedForms
             tsmiBackClipBoardCopies.Text = "Copiar textos do banco de dados";
             tsmiBackClipBoardCopies.Click += BackToScreen;
             // 
+            // tsmiTogglePagination
+            // 
+            tsmiTogglePagination.Name = "tsmiTogglePagination";
+            tsmiTogglePagination.Size = new System.Drawing.Size(248, 22);
+            tsmiTogglePagination.Text = "Ativar Paginação";
+            tsmiTogglePagination.Click += tsmiTogglePagination_Click;
+            // 
             // atalhosToolStripMenuItem
             // 
             atalhosToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { visualizarToolStripMenuItem, adicionarToolStripMenuItem, atualizarToolStripMenuItem, removerToolStripMenuItem });
@@ -116,21 +130,28 @@ namespace AppMultiTool.RelatedForms
             // visualizarToolStripMenuItem
             // 
             visualizarToolStripMenuItem.Name = "visualizarToolStripMenuItem";
-            visualizarToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            visualizarToolStripMenuItem.Size = new System.Drawing.Size(125, 22);
             visualizarToolStripMenuItem.Text = "Visualizar";
             visualizarToolStripMenuItem.Click += ViewShortCuts;
             // 
             // adicionarToolStripMenuItem
             // 
             adicionarToolStripMenuItem.Name = "adicionarToolStripMenuItem";
-            adicionarToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            adicionarToolStripMenuItem.Size = new System.Drawing.Size(125, 22);
             adicionarToolStripMenuItem.Text = "Adicionar";
             adicionarToolStripMenuItem.Click += AddShortCut;
+            // 
+            // atualizarToolStripMenuItem
+            // 
+            atualizarToolStripMenuItem.Name = "atualizarToolStripMenuItem";
+            atualizarToolStripMenuItem.Size = new System.Drawing.Size(125, 22);
+            atualizarToolStripMenuItem.Text = "Atualizar";
+            atualizarToolStripMenuItem.Click += UpdateShortCut;
             // 
             // removerToolStripMenuItem
             // 
             removerToolStripMenuItem.Name = "removerToolStripMenuItem";
-            removerToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            removerToolStripMenuItem.Size = new System.Drawing.Size(125, 22);
             removerToolStripMenuItem.Text = "Remover";
             removerToolStripMenuItem.Click += RemoveShortCut;
             // 
@@ -440,16 +461,17 @@ namespace AppMultiTool.RelatedForms
             txtShowItem.TabIndex = 52;
             txtShowItem.Text = "";
             txtShowItem.TextChanged += txtShowItem_TextChanged;
+            txtShowItem.Resize += txtShowItem_Resize;
             // 
-            // label9
+            // lblAutoRollActive
             // 
-            label9.AutoSize = true;
-            label9.Font = new System.Drawing.Font("Segoe UI", 10F);
-            label9.Location = new System.Drawing.Point(46, 710);
-            label9.Name = "label9";
-            label9.Size = new System.Drawing.Size(96, 19);
-            label9.TabIndex = 53;
-            label9.Text = "Auto Rolagem";
+            lblAutoRollActive.AutoSize = true;
+            lblAutoRollActive.Font = new System.Drawing.Font("Segoe UI", 10F);
+            lblAutoRollActive.Location = new System.Drawing.Point(46, 710);
+            lblAutoRollActive.Name = "lblAutoRollActive";
+            lblAutoRollActive.Size = new System.Drawing.Size(96, 19);
+            lblAutoRollActive.TabIndex = 53;
+            lblAutoRollActive.Text = "Auto Rolagem";
             // 
             // tbarAutoRoll
             // 
@@ -510,23 +532,102 @@ namespace AppMultiTool.RelatedForms
             lblSearchText.MouseEnter += lblSearchText_MouseEnter;
             lblSearchText.MouseLeave += lblSearchText_MouseLeave;
             // 
-            // atualizarToolStripMenuItem
+            // btnLastPage
             // 
-            atualizarToolStripMenuItem.Name = "atualizarToolStripMenuItem";
-            atualizarToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            atualizarToolStripMenuItem.Text = "Atualizar";
-            atualizarToolStripMenuItem.Click += UpdateShortCut;
+            btnLastPage.BackColor = System.Drawing.Color.Peru;
+            btnLastPage.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            btnLastPage.Font = new System.Drawing.Font("Segoe UI", 40F, System.Drawing.FontStyle.Bold);
+            btnLastPage.Location = new System.Drawing.Point(8, 723);
+            btnLastPage.Name = "btnLastPage";
+            btnLastPage.Size = new System.Drawing.Size(66, 87);
+            btnLastPage.TabIndex = 58;
+            btnLastPage.Text = "<";
+            btnLastPage.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            btnLastPage.UseVisualStyleBackColor = false;
+            btnLastPage.Visible = false;
+            btnLastPage.Click += btnLastPage_Click;
+            // 
+            // btnNextPage
+            // 
+            btnNextPage.BackColor = System.Drawing.Color.Peru;
+            btnNextPage.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            btnNextPage.Font = new System.Drawing.Font("Segoe UI", 40F, System.Drawing.FontStyle.Bold);
+            btnNextPage.Location = new System.Drawing.Point(104, 723);
+            btnNextPage.Name = "btnNextPage";
+            btnNextPage.Size = new System.Drawing.Size(66, 87);
+            btnNextPage.TabIndex = 59;
+            btnNextPage.Text = ">";
+            btnNextPage.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            btnNextPage.UseVisualStyleBackColor = false;
+            btnNextPage.Visible = false;
+            btnNextPage.Click += btnNextPage_Click;
+            // 
+            // lblPaginationActive
+            // 
+            lblPaginationActive.AutoSize = true;
+            lblPaginationActive.Font = new System.Drawing.Font("Segoe UI", 10F);
+            lblPaginationActive.Location = new System.Drawing.Point(54, 701);
+            lblPaginationActive.Name = "lblPaginationActive";
+            lblPaginationActive.Size = new System.Drawing.Size(71, 19);
+            lblPaginationActive.TabIndex = 60;
+            lblPaginationActive.Text = "Paginação";
+            lblPaginationActive.Visible = false;
+            // 
+            // lblPageCount
+            // 
+            lblPageCount.AutoSize = true;
+            lblPageCount.Font = new System.Drawing.Font("Segoe UI", 16F);
+            lblPageCount.Location = new System.Drawing.Point(68, 813);
+            lblPageCount.Name = "lblPageCount";
+            lblPageCount.Size = new System.Drawing.Size(46, 30);
+            lblPageCount.TabIndex = 61;
+            lblPageCount.Text = "0/0";
+            lblPageCount.Visible = false;
+            // 
+            // btnStartControllerJoystick
+            // 
+            btnStartControllerJoystick.BackColor = System.Drawing.Color.Green;
+            btnStartControllerJoystick.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            btnStartControllerJoystick.Font = new System.Drawing.Font("Segoe UI", 10F);
+            btnStartControllerJoystick.Location = new System.Drawing.Point(10, 848);
+            btnStartControllerJoystick.Name = "btnStartControllerJoystick";
+            btnStartControllerJoystick.Size = new System.Drawing.Size(160, 48);
+            btnStartControllerJoystick.TabIndex = 62;
+            btnStartControllerJoystick.Text = "Controlar Páginas com Joystick";
+            btnStartControllerJoystick.UseVisualStyleBackColor = false;
+            btnStartControllerJoystick.Visible = false;
+            btnStartControllerJoystick.Click += btnStartStopControllerJoystick_Click;
+            // 
+            // lblCommandInfo
+            // 
+            lblCommandInfo.AutoSize = true;
+            lblCommandInfo.Cursor = System.Windows.Forms.Cursors.Hand;
+            lblCommandInfo.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Underline);
+            lblCommandInfo.ForeColor = System.Drawing.SystemColors.Highlight;
+            lblCommandInfo.Location = new System.Drawing.Point(23, 899);
+            lblCommandInfo.Name = "lblCommandInfo";
+            lblCommandInfo.Size = new System.Drawing.Size(138, 19);
+            lblCommandInfo.TabIndex = 63;
+            lblCommandInfo.Text = "Comandos Controle?";
+            lblCommandInfo.Visible = false;
+            lblCommandInfo.Click += lblCommandInfo_Click;
             // 
             // ClipBoardCopiesTxt
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             ClientSize = new System.Drawing.Size(1050, 1011);
+            Controls.Add(lblCommandInfo);
+            Controls.Add(btnStartControllerJoystick);
+            Controls.Add(lblPageCount);
+            Controls.Add(lblPaginationActive);
+            Controls.Add(btnNextPage);
+            Controls.Add(btnLastPage);
             Controls.Add(lblSearchText);
             Controls.Add(btnRenameItem);
             Controls.Add(btnUploadToGoogleDocs);
             Controls.Add(tbarAutoRoll);
-            Controls.Add(label9);
+            Controls.Add(lblAutoRollActive);
             Controls.Add(txtShowItem);
             Controls.Add(label8);
             Controls.Add(btnPickFolder);
@@ -598,7 +699,7 @@ namespace AppMultiTool.RelatedForms
         private System.Windows.Forms.Button btnPickFolder;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.RichTextBox txtShowItem;
-        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Label lblAutoRollActive;
         private System.Windows.Forms.TrackBar tbarAutoRoll;
         private System.Windows.Forms.Timer scrollTimer;
         private System.Windows.Forms.Button btnUploadToGoogleDocs;
@@ -612,5 +713,12 @@ namespace AppMultiTool.RelatedForms
         private System.Windows.Forms.ToolStripMenuItem removerToolStripMenuItem;
         private System.Windows.Forms.Label lblSearchText;
         private System.Windows.Forms.ToolStripMenuItem atualizarToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem tsmiTogglePagination;
+        private System.Windows.Forms.Button btnLastPage;
+        private System.Windows.Forms.Button btnNextPage;
+        private System.Windows.Forms.Label lblPaginationActive;
+        private System.Windows.Forms.Label lblPageCount;
+        private System.Windows.Forms.Button btnStartControllerJoystick;
+        private System.Windows.Forms.Label lblCommandInfo;
     }
 }

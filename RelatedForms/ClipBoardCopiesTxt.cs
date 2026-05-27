@@ -1,20 +1,25 @@
-﻿using System;
+﻿using AngleSharp.Common;
+using AngleSharp.Text;
+using AppMultiTool.MainForms;
+using AppMultiTool.Models;
+using AppMultiTool.Utils;
+using AppMultiTool.Utils.Controllers;
+using AppMultiTool.Utils.GlobalItems;
+using Google.Cloud.AIPlatform.V1;
+using IronPython.Runtime.Operations;
+using MasterWindowsForms;
+using MySql.Data.MySqlClient;
+using SharpDX.DirectInput;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.IO;
-using AppMultiTool.Utils;
-using AppMultiTool.MainForms;
-using MasterWindowsForms;
-using IronPython.Runtime.Operations;
-using MySql.Data.MySqlClient;
-using AngleSharp.Common;
-using AppMultiTool.Utils.GlobalItems;
-using AppMultiTool.Utils.Controllers;
 
 namespace AppMultiTool.RelatedForms
 {
@@ -22,10 +27,14 @@ namespace AppMultiTool.RelatedForms
     {
         private string folderPath = string.Empty;
         private int LocateIndex = 0;
+        private int curpage = 0;
         private bool insertingFile = false;
+        private bool usingPagination = false;
         private readonly MasterMySQLService sql;
         private readonly Dictionary<string, string> items;
         private readonly XMLHandler xml;
+        private readonly JoyStickControllerModel joycontrol;
+        private readonly List<string> pages = [];
 
         #region Config
         public ClipBoardCopiesTxt()
@@ -41,7 +50,10 @@ namespace AppMultiTool.RelatedForms
             ThemeHandler.ApplyTheme(Master.ListControls(this), ttype);
             ThemeHandler.ApplyWallPaper(this, wpp);
 
-            Global.GlobalTimer.UpdateTitleTime += (object sender, EventArgs e) => Global.GlobalTimer.UpdateTitleTimeLabelForm(lblTitle);
+            Global.GlobalTimer.UpdateTitleTime += (sender, e) => Global.GlobalTimer.UpdateTitleTimeLabelForm(lblTitle);
+
+            joycontrol = new();
+            joycontrol.ConnectionChanged += ChangeColorConnectionLabel;
         }
 
         private async void ClipBoardCopiesTxt_Shown(object sender, EventArgs e)
@@ -59,6 +71,8 @@ namespace AppMultiTool.RelatedForms
         {
             if (Global.AllowCloseApp)
                 Application.Exit();
+            else
+                this.DisposeJoyControlProcedure();
         }
 
         private async Task ConnectDB()
@@ -83,7 +97,7 @@ namespace AppMultiTool.RelatedForms
             {
                 Master.ShowErrorMessage(ex.Message);
             }
-        }
+        }        
         #endregion
 
         #region Options
@@ -107,8 +121,32 @@ namespace AppMultiTool.RelatedForms
                         Global.Forms.ClipboardCopies = (ClipboardCopies)form;
                 }
 
+                this.DisposeJoyControlProcedure();
+
                 Master.SwitchScreen(form, this);
             }
+        }
+
+        private void tsmiTogglePagination_Click(object sender, EventArgs e)
+        {
+            usingPagination = !usingPagination;
+            lblAutoRollActive.Visible = !usingPagination;
+            tbarAutoRoll.Visible = !usingPagination;
+            lblPaginationActive.Visible = usingPagination;
+            btnLastPage.Visible = usingPagination;
+            btnNextPage.Visible = usingPagination;
+            lblPageCount.Visible = usingPagination;
+            btnStartControllerJoystick.Visible = usingPagination;
+            lblCommandInfo.Visible = usingPagination;
+            txtShowItem.ScrollBars = usingPagination ? RichTextBoxScrollBars.None : RichTextBoxScrollBars.Vertical;
+            tsmiTogglePagination.Text = usingPagination ? "Ativar Rolagem" : "Ativar Paginação";
+
+            this.DisposeJoyControlProcedure();
+
+            if (usingPagination)
+                this.PaginateText();
+            else
+                cbbListItens_SelectedIndexChanged(new(), EventArgs.Empty);
         }
 
         private void ViewShortCuts(object sender, EventArgs e)
@@ -208,7 +246,7 @@ namespace AppMultiTool.RelatedForms
                 else
                     Master.ShowInfoMessage("Nenhum valor foi atualizado");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Master.ShowErrorMessage(ex.Message);
             }
@@ -374,6 +412,9 @@ namespace AppMultiTool.RelatedForms
 
             try
             {
+                if (usingPagination)
+                    throw new Exception("Só é possível inserir itens novos com a paginação DESABILITADA, ou seja, com a ativação da ROLAGEM");
+
                 if (cbbListItens.SelectedIndex > 0)
                     throw new Exception("Necessário que nenhum item esteja selecionado.");
 
@@ -423,6 +464,9 @@ namespace AppMultiTool.RelatedForms
             {
                 if (cbbListItens.SelectedIndex <= 0)
                     throw new Exception("Necessário selecionar um item para atualizar!");
+
+                if (usingPagination)
+                    throw new Exception("Só é possível salvar com a paginação DESABILITADA, ou seja, com a ativação da ROLAGEM.\n\nMotivo: Sou preguiçoso demais para programar o salvamento com paginação :p");
 
                 string path = this.GetCurrentFilePath();
                 await File.WriteAllTextAsync(path, txtShowItem.Text);
@@ -521,20 +565,30 @@ namespace AppMultiTool.RelatedForms
             btnCopyToClipboard.Focus();
         }
 
-        private async void cbbListItens_SelectedIndexChanged(object sender, EventArgs e)
+        private async Task<string> GetOriginalText()
         {
             if (cbbListItens.Items.Count > 0 && cbbListItens.SelectedIndex > 0 && !string.IsNullOrEmpty(folderPath) && !this.insertingFile)
             {
-                try
-                {
-                    string path = this.GetCurrentFilePath();
-                    txtShowItem.Text = await File.ReadAllTextAsync(path);
-                    lblInfoTxtChanged.Visible = false;
-                }
-                catch (Exception ex)
-                {
-                    Master.ShowErrorMessage(ex.Message);
-                }
+                string path = this.GetCurrentFilePath();
+                return await File.ReadAllTextAsync(path);
+            }
+
+            return string.Empty;
+        }
+
+        private async void cbbListItens_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                txtShowItem.Text = await GetOriginalText();
+                lblInfoTxtChanged.Visible = false;
+
+                if (usingPagination)
+                    this.PaginateText();
+            }
+            catch (Exception ex)
+            {
+                Master.ShowErrorMessage(ex.Message);
             }
 
             if (cbbListItens.SelectedIndex == 0)
@@ -542,6 +596,119 @@ namespace AppMultiTool.RelatedForms
                 txtShowItem.Text = string.Empty;
                 lblInfoTxtChanged.Visible = false;
             }
+        }
+
+        private async void PaginateText()
+        {
+            this.DisposeJoyControlProcedure();
+
+            btnLastPage.Enabled = false;
+            pages.Clear();
+
+            if (string.IsNullOrWhiteSpace(txtShowItem.Text))
+                return;
+
+            string originalText = await GetOriginalText();
+
+            Size area = txtShowItem.ClientSize;
+            int start = 0;
+
+            using (Graphics g = txtShowItem.CreateGraphics())
+            {
+                while (start < originalText.Length)
+                {
+                    int bestEnd = start;
+                    int low = start + 1;
+                    int high = originalText.Length;
+
+                    while (low <= high)
+                    {
+                        int mid = (low + high) / 2;
+
+                        string chunk = originalText[start..mid];
+
+                        SizeF size = g.MeasureString(chunk, txtShowItem.Font, area.Width);
+
+                        if (size.Height <= area.Height)
+                        {
+                            bestEnd = mid;
+                            low = mid + 1;
+                        }
+                        else
+                        {
+                            high = mid - 1;
+                        }
+                    }
+
+                    if (bestEnd <= start)
+                        break;
+
+                    string fittedText = originalText[start..bestEnd];
+
+                    SizeF finalSize = g.MeasureString(fittedText, txtShowItem.Font, area.Width);
+
+                    while (finalSize.Height > area.Height && bestEnd > start)
+                    {
+                        bestEnd--;
+
+                        fittedText = originalText[start..bestEnd];
+
+                        finalSize = g.MeasureString(
+                            fittedText,
+                            txtShowItem.Font,
+                            area.Width
+                        );
+                    }
+
+                    int safeEnd = bestEnd;
+
+                    while (safeEnd > start &&
+                           !char.IsWhiteSpace(originalText[safeEnd - 1]))
+                    {
+                        safeEnd--;
+                    }
+
+                    if (safeEnd > start)
+                    {
+                        string safeText = originalText[start..safeEnd];
+                        string remainingText = originalText[safeEnd..bestEnd];
+
+                        SizeF remainingSize = g.MeasureString(
+                            safeText + remainingText,
+                            txtShowItem.Font,
+                            area.Width
+                        );
+
+                        if (remainingSize.Height > area.Height)
+                            bestEnd = safeEnd;
+                    }
+
+                    string page = originalText[start..bestEnd].Trim();
+
+                    if (!string.IsNullOrWhiteSpace(page))
+                        pages.Add(page);
+
+                    start = bestEnd;
+
+                    while (start < originalText.Length &&
+                           char.IsWhiteSpace(originalText[start]))
+                    {
+                        start++;
+                    }
+                }
+            }
+
+            if (pages.Count > 0)
+            {
+                curpage = 0;
+                lblPageCount.Text = $"{curpage + 1}/{pages.Count}";
+                txtShowItem.Text = pages[0];
+                btnNextPage.Enabled = true;
+            }
+            else
+                btnNextPage.Enabled = false;
+
+            lblInfoTxtChanged.Visible = false;
         }
 
         private void txtShowItem_TextChanged(object sender, EventArgs e)
@@ -627,13 +794,169 @@ namespace AppMultiTool.RelatedForms
 
         private void tbarAutoRoll_Scroll(object sender, EventArgs e)
         {
-
+            //TODO
         }
 
         private void scrollTimer_Tick(object sender, EventArgs e)
         {
-
+            //TODO
         }
-        #endregion        
+
+        private void btnNextPage_Click(object sender, EventArgs e)
+        {
+            if (cbbListItens.SelectedIndex > 0 && curpage < pages.Count - 1)
+                FillTextPage(1);
+        }
+
+        private void btnLastPage_Click(object sender, EventArgs e)
+        {
+            if (cbbListItens.SelectedIndex > 0 && curpage > 0)
+                FillTextPage(-1);
+        }
+
+        private void FillTextPage(int increaser)
+        {
+            curpage += increaser;
+            txtShowItem.Text = pages[curpage];
+            lblPageCount.Text = $"{curpage + 1}/{pages.Count}";
+
+            btnNextPage.Enabled = curpage < pages.Count - 1;
+            btnLastPage.Enabled = curpage > 0;
+
+            lblInfoTxtChanged.Visible = false;
+        }
+
+        private void txtShowItem_Resize(object sender, EventArgs e)
+        {
+            if (usingPagination)
+                this.PaginateText();
+        }
+        #endregion
+
+        #region JoystickControll
+
+        private void DisposeJoyControlProcedure()
+        {
+            if(joycontrol.JoyConnected)
+                joycontrol?.SoundDisconnected.Play();
+
+            joycontrol.KeepRunning = false;
+            joycontrol.JoyConnected = false;
+            joycontrol.IsProcessingAudio = false;
+            joycontrol?.PollingThread?.Join();
+
+            if (!joycontrol.ManualStopped || (!joycontrol?.Joystick?.IsDisposed ?? false))
+                joycontrol?.Joystick?.Unacquire();
+
+            joycontrol?.Joystick?.Dispose();
+            joycontrol?.DirectInput?.Dispose();
+        }
+
+        private void btnStartStopControllerJoystick_Click(object sender, EventArgs e)
+        {
+            if (joycontrol.JoyConnected)
+            {
+                joycontrol.ManualStopped = true;                
+                this.DisposeJoyControlProcedure();
+                return;
+            }
+
+            this.Initializecontrol();
+
+            if (joycontrol.JoyConnected)
+            {
+                joycontrol.SoundConnected.Play();
+                joycontrol.KeepRunning = true;
+                joycontrol.PollingThread = new(PollJoystick) { IsBackground = true };
+                joycontrol.PollingThread.Start();
+                joycontrol.ManualStopped = false;
+            }
+        }
+
+        private void ChangeColorConnectionLabel(object sender, EventArgs e)
+        {
+            if (joycontrol.JoyConnected)
+            {
+                btnStartControllerJoystick.Text = "Parar Controle";
+                btnStartControllerJoystick.BackColor = Color.DarkRed;
+            }
+            else
+            {
+                btnStartControllerJoystick.Text = "Controlar Páginas com Joystick";
+                btnStartControllerJoystick.BackColor = Color.Green;
+            }
+        }
+
+        private void Initializecontrol()
+        {
+            joycontrol.DirectInput = new();
+            var JoystickGuid = Guid.Empty;
+
+            try
+            {
+                foreach (var deviceInstance in joycontrol.DirectInput.GetDevices(DeviceType.Gamepad, DeviceEnumerationFlags.AllDevices))
+                    JoystickGuid = deviceInstance.InstanceGuid;
+
+                if (JoystickGuid == Guid.Empty)
+                    foreach (var deviceInstance in joycontrol.DirectInput.GetDevices(DeviceType.Joystick, DeviceEnumerationFlags.AllDevices))
+                        JoystickGuid = deviceInstance.InstanceGuid;
+
+                if (JoystickGuid != Guid.Empty)
+                {
+                    joycontrol.Joystick = new(joycontrol.DirectInput, JoystickGuid);
+
+                    foreach (var deviceObject in joycontrol.Joystick.GetObjects())
+                    {
+                        if ((deviceObject.ObjectId.Flags & DeviceObjectTypeFlags.Axis) != 0)
+                            joycontrol.Joystick.GetObjectPropertiesById(deviceObject.ObjectId).Range = new(-1000, 1000);
+                    }
+
+                    joycontrol.Joystick.Properties.BufferSize = 128;
+                    joycontrol.Joystick.Acquire();
+                    joycontrol.JoyConnected = true;
+                    joycontrol.ManualStopped = false;
+                }
+                else
+                {
+                    Master.ShowErrorMessage("Nenhum controle foi encontrado! \nVerifique a conexão do mesmo com o computador.", "FALHA AO ENCONTRAR CONTROLE");
+                    joycontrol.JoyConnected = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                Master.ShowErrorMessage(ex.Message);
+                joycontrol.JoyConnected = false;
+            }
+        }
+
+        private void PollJoystick()
+        {
+            while (joycontrol.KeepRunning)
+            {
+                joycontrol.Joystick.Poll();
+                var datas = joycontrol.Joystick.GetBufferedData();
+                foreach (var state in datas)
+                {
+
+                    if (state.Value == 128)
+                    {
+                        switch (state.Offset)
+                        {
+                            case JoystickOffset.Buttons0: // Button A
+                                this.BeginInvoke(new EventHandler(btnLastPage_Click), new(), EventArgs.Empty);
+                                break;
+                            case JoystickOffset.Buttons1: // Button B
+                                this.BeginInvoke(new EventHandler(btnNextPage_Click), new(), EventArgs.Empty);
+                                break;
+                        }
+                    }
+                }
+                Thread.Sleep(20);
+            }
+        }
+
+        private void lblCommandInfo_Click(object sender, EventArgs e) => Master.ShowInfoMessage("BOTÃO B -> AVANÇAR PÁGINA\nBOTÃO A -> RETROCEDER PÁGINA","Comandos do Controle");
+
+        #endregion
     }
 }
