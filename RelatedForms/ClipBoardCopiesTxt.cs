@@ -837,19 +837,19 @@ namespace AppMultiTool.RelatedForms
 
         private void DisposeJoyControlProcedure()
         {
-            if(joycontrol.JoyConnected)
-                joycontrol?.SoundDisconnected.Play();
+            try
+            {
+                if (joycontrol.JoyConnected)
+                    joycontrol?.SoundDisconnected.Play();
 
-            joycontrol.KeepRunning = false;
-            joycontrol.JoyConnected = false;
-            joycontrol.IsProcessingAudio = false;
-            joycontrol?.PollingThread?.Join();
-
-            if (!joycontrol.ManualStopped || (!joycontrol?.Joystick?.IsDisposed ?? false))
-                joycontrol?.Joystick?.Unacquire();
-
-            joycontrol?.Joystick?.Dispose();
-            joycontrol?.DirectInput?.Dispose();
+                joycontrol.KeepRunning = false;
+                joycontrol.JoyConnected = false;
+                joycontrol.IsProcessingAudio = false;
+                joycontrol?.PollingThread?.Join();
+                joycontrol?.Joystick?.Dispose();
+                joycontrol?.DirectInput?.Dispose();
+            }
+            catch { }            
         }
 
         private void btnStartStopControllerJoystick_Click(object sender, EventArgs e)
