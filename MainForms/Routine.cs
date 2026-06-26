@@ -284,7 +284,13 @@ namespace AppMultiTool.MainForms
                 processItems.ForEach(p =>
                 {
                     if (p.Using)
-                        Process.Start(p.Path, p.Args);
+                        Process.Start(new ProcessStartInfo
+                        {
+                            FileName = p.Path,
+                            Arguments = p.Args,
+                            UseShellExecute = false,
+                            CreateNoWindow = true
+                        });
                     Thread.Sleep(150);
                 });
 

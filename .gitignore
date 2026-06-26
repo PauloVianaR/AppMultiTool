@@ -379,3 +379,7 @@ Material/Tesseract
 /Material/wpp3.png
 /Material/youtube-dl.exe
 /Material/yt-dlp.exe
+
+# Ignore PlayLists
+PlayLists/*
+/PlayLists/*

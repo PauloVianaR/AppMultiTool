@@ -453,12 +453,12 @@ namespace AppMultiTool.MainForms
 
                 var resp = await LyricsExtractor.WebExtraction(artist, song);
 
-                if(!resp.WasSuccessful)
+                if (!resp.WasSuccessful)
                     throw new Exception(resp.ResponseErr);
 
                 rtxtLyrics.Text = resp.Response;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Master.ShowErrorMessage(ex.Message);
             }
@@ -472,6 +472,7 @@ namespace AppMultiTool.MainForms
             switch ((WMPPlayState)newState)
             {
                 case WMPPlayState.wmppsPlaying:
+                    trackBarSong.Maximum = (int)control.Player.currentMedia.duration;
                     control.ManualSongSelected = false;
                     lblPlayingInfo.Text = control.CurrentPlaylist[control.CurrentTrackIndex].Title;
                     break;
@@ -658,8 +659,7 @@ namespace AppMultiTool.MainForms
             if (control.Player.currentMedia != null)
             {
                 this.Invoke((MethodInvoker)delegate
-                {
-                    trackBarSong.Maximum = (int)control.Player.currentMedia.duration;
+                {                    
                     trackBarSong.Value = (int)control.Player.controls.currentPosition;
 
                     double currentPosition = control.Player.controls.currentPosition;
