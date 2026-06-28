@@ -672,12 +672,23 @@ namespace AppMultiTool.MainForms
             if (control.Player.currentMedia != null)
             {
                 this.Invoke((MethodInvoker)delegate
-                {                    
-                    trackBarSong.Value = (int)control.Player.controls.currentPosition;
+                {
+                    try
+                    {
+                        trackBarSong.Value = (int)control.Player.controls.currentPosition;
 
-                    double currentPosition = control.Player.controls.currentPosition;
-                    double duration = control.Player.currentMedia.duration;
-                    lblDuration.Text = $"{FormatTime(currentPosition)} / {FormatTime(duration)}";
+                        double currentPosition = control.Player.controls.currentPosition;
+                        double duration = control.Player.currentMedia.duration;
+                        lblDuration.Text = $"{FormatTime(currentPosition)} / {FormatTime(duration)}";
+                    }
+                    catch (ArgumentOutOfRangeException)
+                    {
+                        trackBarSong.Value = trackBarSong.Minimum;
+                    }
+                    catch
+                    {
+                        throw;
+                    }
                 });
             }
         }
