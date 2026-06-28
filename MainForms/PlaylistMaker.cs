@@ -581,77 +581,90 @@ namespace AppMultiTool.MainForms
 
         private void btnNext_Click(object sender, EventArgs e)
         {
-            if (cbbListPlaylists.SelectedIndex == 0)
-                return;
-
-            Thread newThread = new(() =>
+            try
             {
-                if (sender is bool)
-                {
-                    Thread.Sleep(1000);
-                }
+                if (cbbListPlaylists.SelectedIndex == 0)
+                    return;
 
-                this.Invoke((MethodInvoker)delegate
+                Thread newThread = new(() =>
                 {
-                    control.Player.controls.stop();
-
-                    if (control.RandomPlaylist)
+                    if (sender is bool)
                     {
-                        if (control.SongsPlayedIndex.Count != control.CurrentPlaylist.Count)
+                        Thread.Sleep(1000);
+                    }
+
+                    this.Invoke((MethodInvoker)delegate
+                    {
+                        control.Player.controls.stop();
+
+                        if (control.RandomPlaylist)
                         {
-                            bool canRunningLoop = true;
-
-                            while (canRunningLoop)
+                            if (control.SongsPlayedIndex.Count != control.CurrentPlaylist.Count)
                             {
-                                Random x = new();
-                                int index = x.Next(0, control.CurrentPlaylist.Count + 1);
+                                bool canRunningLoop = true;
 
-                                if (control.SongsPlayedIndex.Contains(index))
-                                    continue;
+                                while (canRunningLoop)
+                                {
+                                    Random x = new();
+                                    int index = Random.Shared.Next(control.CurrentPlaylist.Count);
 
-                                control.CurrentTrackIndex = index;
-                                canRunningLoop = false;
+                                    if (control.SongsPlayedIndex.Contains(index))
+                                        continue;
+
+                                    control.CurrentTrackIndex = index;
+                                    canRunningLoop = false;
+                                }
                             }
                         }
-                    }
-                    else
-                        control.CurrentTrackIndex++;
+                        else
+                            control.CurrentTrackIndex++;
 
-                    if ((control.CurrentTrackIndex < control.CurrentPlaylist.Count && !control.RandomPlaylist)
-                    || (control.RandomPlaylist && control.SongsPlayedIndex.Count != control.CurrentPlaylist.Count))
-                    {
-                        control.Player.URL = control.CurrentPlaylist[control.CurrentTrackIndex].Path;
-                        control.Player.controls.play();
-
-                        if (control.RandomPlaylist)
-                            control.SongsPlayedIndex.Add(control.CurrentTrackIndex);
-                    }
-                    else if (control.LoopPlaylist)
-                    {
-                        control.CurrentTrackIndex = 0;
-                        control.Player.URL = control.CurrentPlaylist[control.CurrentTrackIndex].Path;
-                        control.Player.controls.play();
-
-                        if (control.RandomPlaylist)
+                        if (control.CurrentTrackIndex < 0 || control.CurrentTrackIndex >= control.CurrentPlaylist.Count)
                         {
-                            control.SongsPlayedIndex.Clear();
-                            control.SongsPlayedIndex.Add(control.CurrentTrackIndex);
+                            throw new InvalidOperationException(
+                                $"CurrentTrackIndex inválido: {control.CurrentTrackIndex}, Count={control.CurrentPlaylist.Count}");
                         }
-                    }
-                    else
-                    {
-                        control.CurrentTrackIndex = 0;
-                        control.Player.URL = control.CurrentPlaylist[control.CurrentTrackIndex].Path;
-                        StopSong();
-                        return;
-                    }
 
-                    btnPlayPause.Text = "II";
-                    control.IsSongStarted = true;
+                        if ((control.CurrentTrackIndex < control.CurrentPlaylist.Count && !control.RandomPlaylist)
+                        || (control.RandomPlaylist && control.SongsPlayedIndex.Count != control.CurrentPlaylist.Count))
+                        {
+                            control.Player.URL = control.CurrentPlaylist[control.CurrentTrackIndex].Path;
+                            control.Player.controls.play();
+
+                            if (control.RandomPlaylist)
+                                control.SongsPlayedIndex.Add(control.CurrentTrackIndex);
+                        }
+                        else if (control.LoopPlaylist)
+                        {
+                            control.CurrentTrackIndex = 0;
+                            control.Player.URL = control.CurrentPlaylist[control.CurrentTrackIndex].Path;
+                            control.Player.controls.play();
+
+                            if (control.RandomPlaylist)
+                            {
+                                control.SongsPlayedIndex.Clear();
+                                control.SongsPlayedIndex.Add(control.CurrentTrackIndex);
+                            }
+                        }
+                        else
+                        {
+                            control.CurrentTrackIndex = 0;
+                            control.Player.URL = control.CurrentPlaylist[control.CurrentTrackIndex].Path;
+                            StopSong();
+                            return;
+                        }
+
+                        btnPlayPause.Text = "II";
+                        control.IsSongStarted = true;
+                    });
                 });
-            });
 
-            newThread.Start();
+                newThread.Start();
+            }
+            catch (Exception ex)
+            {
+                Master.ShowErrorMessage(ex.Message);
+            }
         }
 
         private void timer_Tick(object sender, EventArgs e)
